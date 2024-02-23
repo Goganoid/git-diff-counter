@@ -21,10 +21,12 @@ const formatPath = (uri: string) => {
   return [disk, ...fragments.slice(startIndex + 1)].join('\\');
 };
 
-const diff_shortstat = (cwd: string) => {
+const diff_shortstat = (cwd: string, cached?: boolean) => {
+  const baseCommand = 'git diff --shortstat';
+  const command = cached ? `${baseCommand} --cached` : baseCommand;
   return new Promise<Changes | undefined>((resolve, reject) => {
     exec(
-      'git diff --shortstat',
+      command,
       { cwd },
       async (error: ExecException | null, stdout, stderr) => {
         if (error) {
@@ -67,10 +69,19 @@ export function activate(context: vscode.ExtensionContext) {
   // Function to update the status bar with git diff output
   async function updateStatusBar() {
     try {
-      const changes = await diff_shortstat(formatPath(rootPath));
-      if (changes) {
-        status.text = formatChanges(changes);
-        status.tooltip = changes.stdout;
+      const formattedPath = formatPath(rootPath);
+      const unstagedChanges = await diff_shortstat(formattedPath);
+      const stagedChanges = await diff_shortstat(formattedPath, true);
+
+      if (unstagedChanges || stagedChanges) {
+        status.text = formatChanges({
+          added: (unstagedChanges?.added ?? 0) + (stagedChanges?.added ?? 0),
+          removed:
+            (unstagedChanges?.removed ?? 0) + (stagedChanges?.removed ?? 0),
+          filesChanged:
+            (unstagedChanges?.filesChanged ?? 0) +
+            (stagedChanges?.filesChanged ?? 0)
+        });
         status.show();
       } else {
         status.hide();

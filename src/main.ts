@@ -2,7 +2,6 @@ export interface Changes {
   added: number;
   removed: number;
   filesChanged: number;
-  stdout: string;
 }
 
 export const countChanges = async (
@@ -31,7 +30,6 @@ export const countChanges = async (
       added: counts[0],
       removed: counts[1],
       filesChanged: counts[2],
-      stdout
     };
   } catch {
     return undefined;
