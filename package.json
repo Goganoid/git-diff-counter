@@ -6,6 +6,12 @@
   "engines": {
     "vscode": "^1.86.0"
   },
+  "publisher": "yokanochko",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Goganoid/git-diff-counter"
+  },
+  "icon": "assets/icon.png",
   "categories": [
     "Other"
   ],
